@@ -1,8 +1,43 @@
-import { StatusBar } from "expo-status-bar";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import logo from "./assets/logo.png";
+import { useState } from "react";
 
-export default function App() {
+const App = () => {
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  let openImagePicker = async () => {
+    let permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    // console.log(permissionResult);
+
+    if (permissionResult.status === false) {
+      alert("permision to access camera roll is required!");
+      return;
+    }
+
+    let pickerResult = await ImagePicker.launchImageLibraryAsync();
+    console.log(pickerResult);
+
+    if (pickerResult.cancelled === true) {
+      return;
+    }
+    setSelectedImage({ localUri: pickerResult.uri });
+  };
+
+  if (selectedImage !== null) {
+    return (
+      <View style={styles.container}>
+        <Image
+          style={styles.thumbnail}
+          source={{ uri: selectedImage.localUri }}
+        />
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>Share Photo</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Image source={logo} style={styles.logo} />
@@ -12,15 +47,12 @@ export default function App() {
         below!
       </Text>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => alert("Button Pressed!")}
-      >
+      <TouchableOpacity style={styles.button} onPress={openImagePicker}>
         <Text style={styles.buttonText}>Pick a Photo</Text>
       </TouchableOpacity>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -49,4 +81,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "#fff",
   },
+  thumbnail: {
+    width: 500,
+    height: 500,
+    resizeMode: "contain",
+    marginBottom: 20,
+  },
 });
+
+export default App;
